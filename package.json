@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "prettier": "prettier --write **/*.ts",
+    "lint": "eslint --fix **/*.ts",
+    "format": "bun prettier && bun lint",
+    "db-generate": "prisma generate",
+    "db-migrate": "bun db-generate && prisma migrate dev --name migration",
+    "db-reset": "prisma migrate reset --force && bun db:migrate",
+    "db-migrate-prod": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "hono": "^4.4.4",
+    "typescript-eslint": "^7.12.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.4.0",
+    "@types/bun": "latest",
+    "eslint": "^9.4.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.1"
+  }
+}
