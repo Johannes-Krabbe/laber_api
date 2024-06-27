@@ -1,14 +1,14 @@
-const keys = ['DB_URL', 'ENVIRONMENT', 'JWT_SECRET']
+const keys = ['DB_URL', 'NODE_ENV', 'JWT_SECRET']
 
 interface IENV {
     DB_URL: string
-    ENVIRONMENT: 'development' | 'staging' | 'production' | 'test'
+    NODE_ENV: 'development' | 'staging' | 'production' | 'test'
     JWT_SECRET: string
 }
 
 function env(): IENV {
     for (const key of keys) {
-        if (key === 'ENVIRONMENT') {
+        if (key === 'NODE_ENV') {
             continue
         }
         if (process.env[key] === undefined) {
@@ -16,16 +16,16 @@ function env(): IENV {
         }
     }
     if (
-        process.env.ENVIRONMENT !== 'test' &&
-        process.env.ENVIRONMENT !== 'staging' &&
-        process.env.ENVIRONMENT !== 'development' &&
-        process.env.ENVIRONMENT !== 'production'
+        process.env.NODE_ENV !== 'test' &&
+        process.env.NODE_ENV !== 'staging' &&
+        process.env.NODE_ENV !== 'development' &&
+        process.env.NODE_ENV !== 'production'
     ) {
-        throw new Error(`Environment variable ENVIRONMENT is not valid`)
+        throw new Error(`Environment variable NODE_ENV is not valid`)
     }
     return {
         DB_URL: process.env.DB_URL as string,
-        ENVIRONMENT: process.env.ENVIRONMENT as
+        NODE_ENV: process.env.NODE_ENV as
             | 'development'
             | 'production'
             | 'staging'

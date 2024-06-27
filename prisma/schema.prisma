@@ -22,21 +22,7 @@ model User {
     password String
 
     // --- Relationships ---
-    keys    Key[]
     devices Device[]
-}
-
-model Key {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    keyType KeyType
-    key     String
-
-    // --- Relationships ---
-    userId String
-    user   User   @relation(fields: [userId], references: [id])
 }
 
 model Device {
@@ -50,10 +36,76 @@ model Device {
     // --- Relationships ---
     userId String
     user   User   @relation(fields: [userId], references: [id])
+
+    identityKeyId String      @unique
+    identityKey   IdentityKey @relation(fields: [identityKeyId], references: [id])
+
+    signedPreKeyId String       @unique
+    signedPreKey   SignedPreKey @relation(fields: [signedPreKeyId], references: [id])
+
+    oneTimePreKeys OneTimePreKey[]
+
+    mailbox Mailbox?
+
+    sendMessages Message[]
 }
 
-enum KeyType {
-    IDENTITY_KEY
-    SIGNED_PREKEY
-    ONE_TIME_PREKEY
+model Mailbox {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // --- Relationships ---
+    deviceId String    @unique
+    device   Device    @relation(fields: [deviceId], references: [id])
+
+    Message  Message[]
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    message String
+
+    // --- Relationships ---
+    mailboxId String
+    mailbox   Mailbox @relation(fields: [mailboxId], references: [id])
+
+    senderDeviceId String
+    senderDevice   Device @relation(fields: [senderDeviceId], references: [id])
+}
+
+model IdentityKey {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    key       String
+
+    // --- Relationships ---
+    device Device?
+}
+
+model SignedPreKey {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    key String
+
+    // --- Relationships ---
+    devices Device?
+}
+
+model OneTimePreKey {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    key String
+
+    // --- Relationships ---
+    devices  Device @relation(fields: [deviceId], references: [id])
+    deviceId String
 }
