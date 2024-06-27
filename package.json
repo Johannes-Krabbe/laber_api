@@ -10,7 +10,9 @@
     "db-migrate-prod": "prisma migrate deploy"
   },
   "dependencies": {
+    "@prisma/client": "5.15.1",
     "hono": "^4.4.4",
+    "prisma": "^5.15.1",
     "typescript-eslint": "^7.12.0"
   },
   "devDependencies": {

@@ -13,10 +13,10 @@ app.use(
     cors({
         origin: [
             'http://localhost:3000',
-            'https://kanabu.app',
-            'https://www.kanabu.app',
-            'https://staging.kanabu.app',
-            'https://www.staging.kanabu.app',
+            'https://laber.app',
+            'https://www.laber.app',
+            'https://staging.laber.app',
+            'https://www.staging.laber.app',
         ],
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     })
