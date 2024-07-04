@@ -30,8 +30,7 @@ model Device {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    deviceId String
-    name     String
+    name String
 
     // --- Relationships ---
     userId String
@@ -56,10 +55,10 @@ model Mailbox {
     updatedAt DateTime @updatedAt
 
     // --- Relationships ---
-    deviceId String    @unique
-    device   Device    @relation(fields: [deviceId], references: [id])
+    deviceId String @unique
+    device   Device @relation(fields: [deviceId], references: [id])
 
-    Message  Message[]
+    Message Message[]
 }
 
 model Message {
@@ -92,7 +91,8 @@ model SignedPreKey {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    key String
+    signature String
+    key       String
 
     // --- Relationships ---
     devices Device?
@@ -106,6 +106,6 @@ model OneTimePreKey {
     key String
 
     // --- Relationships ---
-    devices  Device @relation(fields: [deviceId], references: [id])
+    device   Device @relation(fields: [deviceId], references: [id])
     deviceId String
 }
