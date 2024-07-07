@@ -1,9 +1,9 @@
-/*
 import { prisma } from '../../prisma/client'
 import { test, expect, describe, beforeEach } from 'bun:test'
 import { appMock } from '../mocks/app.mock'
 import { createFakeUser } from '../mocks/user.mock'
-import { X25519Key } from '../utils/x25519.util'
+import { Ed25519Key } from '../utils/curve/ed25519.util'
+import { X25519Key } from '../utils/curve/x25519.util'
 
 describe('Device Controller', () => {
     beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('Device Controller', () => {
     test('POST / => createDevice (happy path)', async () => {
         const userdata = await createFakeUser()
 
-        const identityKeyPair = new X25519Key()
+        const identityKeyPair = new Ed25519Key()
 
         const oneTimePreKeyPairs = await Promise.all(Array.from({ length: 5 }, async () => {
             return new X25519Key()
@@ -37,10 +37,8 @@ describe('Device Controller', () => {
                 oneTimePreKeys: oneTimePreKeyPairs.map((key) => key.getPublicKeyString()),
             }
         })
-
         console.log(out.body.error)
 
         expect(out.status).toBe(201)
     })
 })
-*/

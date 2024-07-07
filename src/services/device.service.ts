@@ -49,12 +49,17 @@ export async function createDevice(data: {
         }
     })
 
-    const oneTimePreKeys = await prisma.oneTimePreKey.createManyAndReturn({
-        data: data.oneTimePreKeys.map(key => ({
-            key,
-            deviceId: device.id
-        }))
-    })
+    const oneTimePreKeys: OneTimePreKey[] = []
+    for (const key of data.oneTimePreKeys) {
+        const oneTimePreKey = await prisma.oneTimePreKey.create({
+            data: {
+                key: key,
+                deviceId: device.id
+            }
+        })
+        oneTimePreKeys.push(oneTimePreKey)
+    }
+
 
     return {
         status: 201,

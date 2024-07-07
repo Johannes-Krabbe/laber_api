@@ -2,7 +2,7 @@ import { Hex } from '@noble/curves/abstract/utils';
 import { ed25519 } from '@noble/curves/ed25519';
 import { uint8ArrayToBase64 } from './encode.util';
 
-export class X25519Key {
+export class Ed25519Key {
     private privateKey: Uint8Array
     private publicKey: Uint8Array
     constructor(privateKey?: Uint8Array) {
@@ -36,17 +36,19 @@ export class X25519Key {
     }
 }
 
-export function validateX25519KeyString(keyString: string) {
-    // Validate if the string is a valid base64
-    const base64Regex = /^[A-Za-z0-9+/]+={0,2}$/;
-    if (!base64Regex.test(keyString)) {
+
+export function isValidEd25519KeyString(base64String: string): boolean {
+    try {
+        const keyBuffer = Buffer.from(base64String, 'base64');
+
+        // ed25519 keys are 32 bytes long for private keys and 32 bytes long for public keys
+        if (keyBuffer.length !== 32) {
+            return false;
+        }
+
+        // Perform additional validation if needed (e.g., using a cryptographic library)
+        return true;
+    } catch (error) {
         return false;
     }
-
-    // Decode the base64 string to a byte array
-    const binaryString = atob(keyString);
-    const byteLength = binaryString.length;
-
-    // X25519 key should be 32 bytes
-    return byteLength === 32;
 }
