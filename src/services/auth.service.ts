@@ -1,42 +1,45 @@
 import { User } from "@prisma/client";
 import { FunctionReturnType } from "../types/function.type";
 import { prisma } from "../../prisma/client";
-import { hashPassword, verifyPassword } from "../utils/password.util";
+import { sendSMS } from "./sms.service";
 
-export async function registerUser(data: { username: string, password: string }): Promise<FunctionReturnType<User, 400 | 201>> {
-    if (await prisma.user.findUnique({
-        where: {
-            username: data.username
-        }
-    })
-    ) {
-        return {
-            message: 'Username already exists',
-            status: 400,
-        }
 
-    }
-
-    const hashedPassword = await hashPassword(data.password)
-
-    const user = await prisma.user.create({
-        data: {
-            username: data.username,
-            password: hashedPassword,
-        }
-    })
-
-    return {
-        message: 'User created',
-        status: 201,
-        data: user
-    }
-}
-
-export async function loginUser(data: { username: string, password: string }): Promise<FunctionReturnType<User, 400 | 200>> {
+export async function loginUser(data: { phoneNumber: string }): Promise<FunctionReturnType<User, 400 | 200>> {
     const user = await prisma.user.findUnique({
         where: {
-            username: data.username
+            phoneNumber: data.phoneNumber
+        }
+    })
+
+    if (!user) {
+        const newUser = await prisma.user.create({
+            data: {
+                phoneNumber: data.phoneNumber
+            }
+        })
+        await sendOTP(newUser)
+
+        return {
+            data: newUser,
+            message: 'User created',
+            status: 200
+        }
+    } else {
+        await sendOTP(user)
+        return {
+            data: user,
+            message: 'Logged in',
+            status: 200
+        }
+    }
+
+
+}
+
+export async function verifyOtp(data: { phoneNumber: string, otp: string }): Promise<FunctionReturnType<User, 400 | 200>> {
+    const user = await prisma.user.findUnique({
+        where: {
+            phoneNumber: data.phoneNumber
         }
     })
 
@@ -47,16 +50,64 @@ export async function loginUser(data: { username: string, password: string }): P
         }
     }
 
-    if (!(await verifyPassword(data.password, user.password))) {
+    const otp = await prisma.otp.findFirst({
+        where: {
+            userId: user.id,
+            code: data.otp
+        }
+    })
+
+    if (!otp) {
         return {
-            message: 'Password incorrect',
+            message: 'Invalid Code',
             status: 400
         }
     }
 
+    const tenMinutesInMs = 10 * 60 * 1000
+
+    if (otp.createdAt.getTime() + tenMinutesInMs < Date.now()) {
+        return {
+            message: 'Code expired, try again',
+            status: 400
+        }
+    }
+
+    await prisma.otp.delete({
+        where: {
+            id: otp.id
+        }
+    })
+
     return {
         data: user,
-        message: 'Logged in',
+        message: 'OTP verified',
         status: 200
+    }
+}
+
+async function sendOTP(user: User) {
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+
+    await prisma.otp.create({
+        data: {
+            code,
+            userId: user.id
+        }
+    })
+
+    const oneHourInMs = 60 * 60 * 1000
+
+    if (await prisma.otp.count({
+        where: {
+            createdAt: {
+                gte: new Date(Date.now() - oneHourInMs)
+            }
+        }
+    }) > 50) {
+        // TODO: send warning to admin!
+        console.log('Too many OTPs sent in the last hour, that were not verified!')
+    } else {
+        await sendSMS({ phoneNumber: user.phoneNumber, message: `Your Laber code is ${code}` })
     }
 }

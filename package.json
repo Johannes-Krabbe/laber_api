@@ -10,6 +10,7 @@
     "db-migrate-prod": "prisma migrate deploy"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.614.0",
     "@hono/zod-validator": "^0.2.2",
     "@noble/curves": "^1.4.0",
     "@prisma/client": "5.15.1",

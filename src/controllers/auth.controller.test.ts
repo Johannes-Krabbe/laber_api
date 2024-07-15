@@ -14,13 +14,12 @@ describe('Auth Controller', () => {
     ======================
     */
 
-    test('POST /auth/register => register (happy path)', async () => {
+    test('POST /auth/login => register (happy path)', async () => {
         const userdata = {
-            username: 'test123',
-            password: 'test',
+            phoneNumber: '+49234567890',
         }
 
-        const res = await appMock.post('/auth/register', {
+        let res = await appMock.post('/auth/login', {
             body: userdata,
         })
 
@@ -28,15 +27,41 @@ describe('Auth Controller', () => {
         expect(res.body.token).toBeDefined()
         expect(res.body.user).toBeDefined()
         expect(res.body.user.id).toBeDefined()
-        expect(res.body.user.username).toBe(userdata.username)
-        expect(res.body.user.password).toBeUndefined()
+        expect(res.body.user.onboardingCompleted).toBeFalse()
+        expect(res.body.user.phoneNumber).toBe(userdata.phoneNumber)
+
+        const otp = await prisma.otp.findFirst({
+            where: {
+                userId: res.body.user.id,
+            }
+        })
+
+        expect(otp).toBeDefined()
+        if(!otp) throw new Error('otp not found')
+        expect(otp.code).toBeDefined()
+        expect(otp.userId).toBe(res.body.user.id)
+        expect(otp.code.length).toBe(6)
+
+
+         res = await appMock.post('/auth/verify', {
+            body: {
+                phoneNumber: userdata.phoneNumber,
+                otp: otp.code,
+            },
+        })
+
+        expect(res.status).toBe(200)
+        expect(res.body.token).toBeDefined()
+        expect(res.body.user).toBeDefined()
+        expect(res.body.user.id).toBeDefined()
+        expect(res.body.user.onboardingCompleted).toBeFalse()
+        expect(res.body.user.phoneNumber).toBe(userdata.phoneNumber)
     })
 
-    test('POST /auth/register => register (ill formated username)', async () => {
+    test('POST /auth/login => register (ill formated phoneNumber)', async () => {
         let res = await appMock.post('/auth/register', {
             body: {
-                username: 'te',
-                password: 'test',
+                phoenNumber: 'alskdfe',
             },
         })
 
@@ -44,8 +69,7 @@ describe('Auth Controller', () => {
 
         res = await appMock.post('/auth/register', {
             body: {
-                username: '$%aaaaaa',
-                password: 'test',
+                phoneNumber: '123456789',
             },
         })
 
@@ -53,7 +77,7 @@ describe('Auth Controller', () => {
 
         res = await appMock.post('/auth/register', {
             body: {
-                password: 'test',
+                nothing: 'test',
             },
         })
 
@@ -66,6 +90,7 @@ describe('Auth Controller', () => {
     =====================
     */
 
+    // TODO continue writing tests here
     test('POST /auth/login => login (happy path)', async () => {
         await appMock.post('/auth/register', {
             body: {
