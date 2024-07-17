@@ -1,7 +1,7 @@
 import { prisma } from '../../prisma/client'
 import { test, expect, describe, beforeEach } from 'bun:test'
 import { appMock } from '../mocks/app.mock'
-import { createFakeUser } from '../mocks/user.mock'
+import { createAndLoginMockUser } from '../mocks/user.mock'
 import { Ed25519Key } from '../utils/curve/ed25519.util'
 import { X25519Key } from '../utils/curve/x25519.util'
 
@@ -12,7 +12,7 @@ describe('Device Controller', () => {
     })
 
     test('POST / => createDevice (happy path)', async () => {
-        const userdata = await createFakeUser()
+        const userdata = await createAndLoginMockUser()
 
         const identityKeyPair = new Ed25519Key()
 

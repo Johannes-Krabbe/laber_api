@@ -4,7 +4,7 @@ import { prisma } from "../../prisma/client";
 import { sendSMS } from "./sms.service";
 
 
-export async function loginUser(data: { phoneNumber: string }): Promise<FunctionReturnType<User, 400 | 200>> {
+export async function loginUser(data: { phoneNumber: string }): Promise<FunctionReturnType<undefined, 400 | 200 | 201>> {
     const user = await prisma.user.findUnique({
         where: {
             phoneNumber: data.phoneNumber
@@ -20,15 +20,13 @@ export async function loginUser(data: { phoneNumber: string }): Promise<Function
         await sendOTP(newUser)
 
         return {
-            data: newUser,
-            message: 'User created',
-            status: 200
+            message: 'User created - send OTP',
+            status: 201
         }
     } else {
         await sendOTP(user)
         return {
-            data: user,
-            message: 'Logged in',
+            message: 'Logged in - send OTP',
             status: 200
         }
     }

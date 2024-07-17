@@ -1,12 +1,37 @@
+import { prisma } from "../../prisma/client";
 import { appMock } from "./app.mock";
 
-export async function createFakeUser() {
+export async function createAndLoginMockUser() {
     const userdata = {
-        username: "testusername",
-        password: "testpassword",
+        phoneNumber: '+49123456789',
     }
-    const res = await appMock.post('/auth/register', {
+
+    await appMock.post('/auth/login', {
         body: userdata,
     })
-    return { ...userdata, token: res.body.token }
+
+    const user = await prisma.user.findFirst({
+        where: {
+            phoneNumber: userdata.phoneNumber,
+        }
+    })
+    if(!user) throw new Error('User not found')
+
+    const otp = await prisma.otp.findFirst({
+        where: {
+            userId: user.id,
+        }
+    })
+
+    if(!otp) throw new Error('Otp not found')
+
+    const verifyRes = await appMock.post('/auth/verify', {
+        body: {
+            phoneNumber: userdata.phoneNumber,
+            otp: otp.code,
+        },
+    })
+
+
+    return { ...userdata, token: verifyRes.body.token }
 }

@@ -2,7 +2,9 @@ import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import { ENV } from "../env";
 
 export const sendSMS = async ({ phoneNumber, message }: { phoneNumber: string, message: string }) => {
-    if (ENV.SEND_SMS) {
+    if(ENV.NODE_ENV === "test"){
+        return
+    } else if (ENV.SEND_SMS) {
         const client = new SNSClient({
             region: process.env.AWS_REGION!,
             credentials: {

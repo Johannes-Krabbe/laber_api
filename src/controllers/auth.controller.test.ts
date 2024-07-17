@@ -24,26 +24,39 @@ describe('Auth Controller', () => {
         })
 
         expect(res.status).toBe(201)
-        expect(res.body.token).toBeDefined()
-        expect(res.body.user).toBeDefined()
-        expect(res.body.user.id).toBeDefined()
-        expect(res.body.user.onboardingCompleted).toBeFalse()
-        expect(res.body.user.phoneNumber).toBe(userdata.phoneNumber)
+        expect(res.body.user).toBeUndefined()
+        expect(res.body.token).toBeUndefined()
+        expect(res.body.message).toBeDefined()
+
+        const user = await prisma.user.findFirst({
+            where: {
+                phoneNumber: userdata.phoneNumber,
+            }
+        })
+
+        expect(user).toBeDefined()
+        if (!user) throw new Error('user not found')
+        expect(user.phoneNumber).toBe(userdata.phoneNumber)
+        expect(user.onboardingCompleted).toBeFalse()
+        expect(user.id).toBeDefined()
+        expect(user.createdAt).toBeDefined()
+        expect(user.updatedAt).toBeDefined()
+        expect(user.profilePicture).toBeNull()
 
         const otp = await prisma.otp.findFirst({
             where: {
-                userId: res.body.user.id,
+                userId: user.id,
             }
         })
 
         expect(otp).toBeDefined()
-        if(!otp) throw new Error('otp not found')
+        if (!otp) throw new Error('otp not found')
         expect(otp.code).toBeDefined()
-        expect(otp.userId).toBe(res.body.user.id)
+        expect(otp.userId).toBe(user.id)
         expect(otp.code.length).toBe(6)
 
 
-         res = await appMock.post('/auth/verify', {
+        res = await appMock.post('/auth/verify', {
             body: {
                 phoneNumber: userdata.phoneNumber,
                 otp: otp.code,
@@ -59,7 +72,7 @@ describe('Auth Controller', () => {
     })
 
     test('POST /auth/login => register (ill formated phoneNumber)', async () => {
-        let res = await appMock.post('/auth/register', {
+        let res = await appMock.post('/auth/login', {
             body: {
                 phoenNumber: 'alskdfe',
             },
@@ -67,7 +80,7 @@ describe('Auth Controller', () => {
 
         expect(res.status).toBe(400)
 
-        res = await appMock.post('/auth/register', {
+        res = await appMock.post('/auth/login', {
             body: {
                 phoneNumber: '123456789',
             },
@@ -75,7 +88,7 @@ describe('Auth Controller', () => {
 
         expect(res.status).toBe(400)
 
-        res = await appMock.post('/auth/register', {
+        res = await appMock.post('/auth/login', {
             body: {
                 nothing: 'test',
             },
@@ -90,19 +103,52 @@ describe('Auth Controller', () => {
     =====================
     */
 
-    // TODO continue writing tests here
     test('POST /auth/login => login (happy path)', async () => {
-        await appMock.post('/auth/register', {
-            body: {
-                username: 'test123',
-                password: 'test',
-            },
+        const userdata = {
+            phoneNumber: '+49234567890',
+        }
+
+        // create user
+        let res = await appMock.post('/auth/login', {
+            body: userdata,
         })
 
-        const res = await appMock.post('/auth/login', {
+
+        // login
+        res = await appMock.post('/auth/login', {
+            body: userdata,
+        })
+
+        expect(res.status).toBe(200)
+        expect(res.body.user).toBeUndefined()
+        expect(res.body.token).toBeUndefined()
+        expect(res.body.message).toBeDefined()
+
+        const user = await prisma.user.findFirst({
+            where: {
+                phoneNumber: userdata.phoneNumber,
+            }
+        })
+
+        if(!user) throw new Error('user not found')
+
+        const otp = await prisma.otp.findFirst({
+            where: {
+                userId: user.id,
+            }
+        })
+
+        expect(otp).toBeDefined()
+        if (!otp) throw new Error('otp not found')
+        expect(otp.code).toBeDefined()
+        expect(otp.userId).toBe(user.id)
+        expect(otp.code.length).toBe(6)
+
+
+        res = await appMock.post('/auth/verify', {
             body: {
-                username: 'test123',
-                password: 'test',
+                phoneNumber: userdata.phoneNumber,
+                otp: otp.code,
             },
         })
 
@@ -110,32 +156,59 @@ describe('Auth Controller', () => {
         expect(res.body.token).toBeDefined()
         expect(res.body.user).toBeDefined()
         expect(res.body.user.id).toBeDefined()
-        expect(res.body.user.username).toBe('test123')
-        expect(res.body.user.password).toBeUndefined()
+        expect(res.body.user.onboardingCompleted).toBeFalse()
+        expect(res.body.user.phoneNumber).toBe(userdata.phoneNumber)
     })
 
-    test('POST /auth/login => login (wrong password)', async () => {
-        await appMock.post('/auth/register', {
-            body: {
-                username: 'test123',
-                password: 'test',
-            },
+    test('POST /auth/login => login (wrong otp)', async () => {
+        const userdata = {
+            phoneNumber: '+49234567890',
+        }
+
+        // create user
+        let res = await appMock.post('/auth/login', {
+            body: userdata,
         })
 
-        const res = await appMock.post('/auth/login', {
-            body: {
-                password: 'test1',
-            },
+
+        // login
+        res = await appMock.post('/auth/login', {
+            body: userdata,
         })
 
-        expect(res.status).toBe(400)
-    })
+        expect(res.status).toBe(200)
+        expect(res.body.user).toBeUndefined()
+        expect(res.body.token).toBeUndefined()
+        expect(res.body.message).toBeDefined()
 
-    test('POST /auth/login => login (user not found)', async () => {
-        const res = await appMock.post('/auth/login', {
+        const user = await prisma.user.findFirst({
+            where: {
+                phoneNumber: userdata.phoneNumber,
+            }
+        })
+
+        if(!user) throw new Error('user not found')
+
+
+
+        const otp = await prisma.otp.findFirst({
+            where: {
+                userId: user.id,
+            }
+        })
+
+        expect(otp).toBeDefined()
+        if (!otp) throw new Error('otp not found')
+        expect(otp.code).toBeDefined()
+        expect(otp.userId).toBe(user.id)
+        expect(otp.code.length).toBe(6)
+
+
+        res = await appMock.post('/auth/verify', {
             body: {
-                username: 'test123',
-                password: 'test',
+                phoneNumber: userdata.phoneNumber,
+                // make sure the otp is wrong
+                otp: otp.code === '123456' ? '654321' : '123456',
             },
         })
 
@@ -149,35 +222,42 @@ describe('Auth Controller', () => {
     */
 
     test('GET /auth/me => me (happy path)', async () => {
-        const registerRes = await appMock.post('/auth/register', {
+        const userdata = {
+            phoneNumber: '+49234567890',
+        }
+
+        // create user
+        await appMock.post('/auth/login', {
+            body: userdata,
+        })
+
+        const otp = await prisma.otp.findFirst({
+            where: {
+                user: {
+                    phoneNumber: userdata.phoneNumber,
+                },
+            }
+        })
+
+        if (!otp) throw new Error('otp not found')
+
+        const verifyRes = await appMock.post('/auth/verify', {
             body: {
-                username: 'test123',
-                password: 'test',
+                phoneNumber: userdata.phoneNumber,
+                // make sure the otp is wrong
+                otp: otp.code,
             },
         })
 
-        let res = await appMock.get('/auth/me', {
+        const meRes = await appMock.get('/auth/me', {
             headers: {
-                Authorization: `${registerRes.body.token}`,
+                Authorization: `${verifyRes.body.token}`,
             },
         })
 
-        expect(res.status).toBe(200)
-        expect(res.body.user).toBeDefined()
-        expect(res.body.user.id).toBeDefined()
-        expect(res.body.user.username).toBe('test123')
-        expect(res.body.user.password).toBeUndefined()
-
-        res = await appMock.get('/auth/me', {
-            headers: {
-                Authorization: `Bearer ${registerRes.body.token}`,
-            },
-        })
-
-        expect(res.status).toBe(200)
-        expect(res.body.user).toBeDefined()
-        expect(res.body.user.id).toBeDefined()
-        expect(res.body.user.username).toBe('test123')
-        expect(res.body.user.password).toBeUndefined()
+        expect(meRes.status).toBe(200)
+        expect(meRes.body.user).toBeDefined()
+        expect(meRes.body.user.id).toBeDefined()
+        expect(meRes.body.user.phoneNumber).toBe(userdata.phoneNumber)
     })
 })

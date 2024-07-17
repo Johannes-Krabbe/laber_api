@@ -21,13 +21,7 @@ authController.post('/login', zValidator('json', zLoginSchema), async (c) => {
     const data = c.req.valid('json')
 
     const out = await loginUser(data)
-    if (out.status === 200 && out.data) {
-        // parse and return
-        const token = await createAccessToken(out.data)
-        return c.json({ user: privateUserTransformer(out.data), token, message: out.message }, out.status)
-    } else {
-        return c.json({ message: out.message }, out.status)
-    }
+    return c.json({ message: out.message }, out.status)
 })
 
 const zVerifySchema = z.object({
