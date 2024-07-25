@@ -37,8 +37,44 @@ describe('Device Controller', () => {
                 oneTimePreKeys: oneTimePreKeyPairs.map((key) => key.getPublicKeyString()),
             }
         })
-        console.log(out.body.error)
 
         expect(out.status).toBe(201)
+    })
+
+    test('GET /all => getDevices (happy path)', async () => {
+        const userdata = await createAndLoginMockUser()
+
+        const identityKeyPair = new Ed25519Key()
+
+        const oneTimePreKeyPairs = await Promise.all(Array.from({ length: 5 }, async () => {
+            return new X25519Key()
+        }))
+
+        const preKeyPair = new X25519Key()
+        const signature = identityKeyPair.sign(preKeyPair.getPublicKey())
+
+        await appMock.post('/device', {
+            headers: {
+                Authorization: `Bearer ${userdata.token}`,
+            },
+            body: {
+                deviceName: 'testdevice',
+                identityKey: identityKeyPair.getPublicKeyString(),
+                signedPreKey: {
+                    key: preKeyPair.getPublicKeyString(),
+                    signature: new TextDecoder().decode(signature),
+                },
+                oneTimePreKeys: oneTimePreKeyPairs.map((key) => key.getPublicKeyString()),
+            }
+        })
+
+        const out = await appMock.get('/device/all', {
+            headers: {
+                Authorization: `Bearer ${userdata.token}`,
+            }
+        })
+
+        expect(out.status).toBe(200)
+        expect(out.body.devices.length).toBe(1)
     })
 })

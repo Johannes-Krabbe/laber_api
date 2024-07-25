@@ -12,6 +12,7 @@ export function oneTimePreKeyTransformer(key: OneTimePreKey) {
 function abstractKeyTransformer(key: SignedPreKey | OneTimePreKey | SignedPreKey) {
     return {
         id: key.id,
-        createdAt: key.createdAt,
+        unixCreatedAt: key.createdAt.getTime(),
+        key: key.key,
     }
 }

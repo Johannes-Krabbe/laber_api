@@ -6,6 +6,7 @@ import { authMiddleware } from '../middlewares/auth.middleware'
 import { createDevice } from '../services/device.service'
 import { isValidEd25519KeyString } from '../utils/curve/ed25519.util';
 import { isValidX25519KeyString } from '../utils/curve/x25519.util';
+import { privateDeviceTransformer } from '../transformers/device.transformer';
 
 
 export const deviceController = new Hono()
@@ -24,7 +25,17 @@ deviceController.post('/', authMiddleware, zValidator('json', zCreateDeviceSchem
     const user = c.var.auth.user
     const data = c.req.valid('json')
     const out = await createDevice({ ...data, user })
-    return c.json({ message: out.message }, out.status)
+    if(!out.data || out.status !== 201) {
+        console.log(out.message)
+        return c.json({ message: out.message }, out.status)
+    }
+    return c.json({
+        message: out.message, device: privateDeviceTransformer({
+            ...out.data.device,
+            signedPreKey: out.data.signedPreKey,
+            oneTimePreKeys: out.data.oneTimePreKeys,
+        })
+    }, out.status)
 })
 
 deviceController.get('/all', authMiddleware, async (c) => {
@@ -38,5 +49,5 @@ deviceController.get('/all', authMiddleware, async (c) => {
         }
     })
 
-    return c.json({ devices }, 200)
+    return c.json({ devices: devices.map((d) => privateDeviceTransformer(d)) }, 200)
 })

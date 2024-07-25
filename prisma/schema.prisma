@@ -21,6 +21,7 @@ model User {
     phoneNumber         String  @unique
     onboardingCompleted Boolean @default(false)
     profilePicture      String?
+    name                String?
 
     // --- Relationships ---
     devices Device[]

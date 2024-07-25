@@ -3,18 +3,20 @@ import { User } from '@prisma/client'
 interface PrivateUser {
     id: string
     phoneNumber: string
-    createdAt: Date
+    unixCreatedAt: number
     onboardingCompleted: boolean
     profilePicture: string | null
+    name: string | null
 }
 
 export function privateUserTransformer(user: User): PrivateUser {
     return {
         id: user.id,
         phoneNumber: user.phoneNumber,
-        createdAt: user.createdAt,
+        unixCreatedAt: user.createdAt.getTime(),
         onboardingCompleted: user.onboardingCompleted,
         profilePicture: user.profilePicture,
+        name: user.name,
     }
 }
 

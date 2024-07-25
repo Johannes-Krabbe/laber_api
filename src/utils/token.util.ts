@@ -8,7 +8,7 @@ export enum TokenType {
 
 export interface TokenPayload {
     userId: string
-    tokenType: string
+    tokenType: TokenType
 }
 
 export function createAccessToken(user: User): Promise<string> {
