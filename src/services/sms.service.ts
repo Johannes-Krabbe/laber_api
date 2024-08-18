@@ -6,10 +6,10 @@ export const sendSMS = async ({ phoneNumber, message }: { phoneNumber: string, m
         return
     } else if (ENV.SEND_SMS) {
         const client = new SNSClient({
-            region: process.env.AWS_REGION!,
+            region: ENV.AWS_REGION,
             credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+                accessKeyId: ENV.AWS_ACCESS_KEY_ID!,
+                secretAccessKey: ENV.AWS_SECRET_ACCESS_KEY!,
             }
         })
 

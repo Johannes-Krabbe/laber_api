@@ -28,25 +28,25 @@ function env(): IENV {
         throw new Error(`Environment variable NODE_ENV is not valid`)
     }
 
-    if (process.env.SEND_SMS && process.env.SEND_SMS !== 'true' && process.env.SEND_SMS !== 'false') {
+    if (process.env['SEND_SMS'] && process.env['SEND_SMS'] !== 'true' && process.env['SEND_SMS'] !== 'false') {
         throw new Error(`Environment variable SEND_SMS is not valid`)
     }
     let SEND_SMS = false
-    if (process.env.SEND_SMS === 'true') {
+    if (process.env['SEND_SMS'] === 'true') {
         SEND_SMS = true
     }
 
     return {
-        DB_URL: process.env.DB_URL as string,
+        DB_URL: process.env['DB_URL'] as string,
         NODE_ENV: process.env.NODE_ENV as
             | 'development'
             | 'production'
             | 'staging'
             | 'test',
-        JWT_SECRET: process.env.JWT_SECRET as string,
-        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID as string,
-        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY as string,
-        AWS_REGION: process.env.AWS_REGION as string,
+        JWT_SECRET: process.env['JWT_SECRET'] as string,
+        AWS_ACCESS_KEY_ID: process.env['AWS_ACCESS_KEY_ID'] as string,
+        AWS_SECRET_ACCESS_KEY: process.env['AWS_SECRET_ACCESS_KEY'] as string,
+        AWS_REGION: process.env['AWS_REGION'] as string,
         SEND_SMS,
     }
 }

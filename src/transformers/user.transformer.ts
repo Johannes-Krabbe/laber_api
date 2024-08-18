@@ -20,3 +20,22 @@ export function privateUserTransformer(user: User): PrivateUser {
     }
 }
 
+
+interface PublicUser {
+    id: string
+    phoneNumberHash: string
+    profilePicture: string | null
+    name: string | null
+    username: string | null
+}
+
+export function publicUserTransformer(user: User): PublicUser {
+    return {
+        id: user.id,
+        phoneNumberHash: user.phoneNumberHash,
+        profilePicture: user.profilePicture,
+        name: user.name,
+        username: user.username
+    }
+
+}

@@ -14,7 +14,8 @@ export async function loginUser(data: { phoneNumber: string }): Promise<Function
     if (!user) {
         const newUser = await prisma.user.create({
             data: {
-                phoneNumber: data.phoneNumber
+                phoneNumber: data.phoneNumber,
+                phoneNumberHash: (new Bun.CryptoHasher('sha256')).update(data.phoneNumber).digest("base64")
             }
         })
         await sendOTP(newUser)
@@ -30,8 +31,38 @@ export async function loginUser(data: { phoneNumber: string }): Promise<Function
             status: 200
         }
     }
+}
 
+export async function updateUser(userId: string, data: {
+    username?: string,
+    profilePicture?: string,
+    name?: string,
+}): Promise<FunctionReturnType<User, 400 | 200>> {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        }
+    })
 
+    if (!user) {
+        return {
+            message: 'User not found',
+            status: 400
+        }
+    }
+
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: userId
+        },
+        data
+    })
+
+    return {
+        data: updatedUser,
+        message: 'User updated',
+        status: 200
+    }
 }
 
 export async function verifyOtp(data: { phoneNumber: string, otp: string }): Promise<FunctionReturnType<User, 400 | 200>> {

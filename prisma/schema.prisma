@@ -19,9 +19,15 @@ model User {
     updatedAt DateTime @updatedAt
 
     phoneNumber         String  @unique
+    phoneNumberHash     String  @unique
     onboardingCompleted Boolean @default(false)
+
+    username            String? @unique
     profilePicture      String?
     name                String?
+
+    phoneNumberDiscoveryEnabled Boolean @default(true)
+    usernameDiscoveryEnabled    Boolean @default(true)
 
     // --- Relationships ---
     devices Device[]

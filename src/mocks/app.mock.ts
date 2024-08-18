@@ -29,7 +29,6 @@ export class AppMock {
                 ...options?.headers,
             },
             body: JSON.stringify(options?.body),
-            cache: 'no-cache',
         })
 
         // eslint-disable-next-line

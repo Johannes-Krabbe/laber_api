@@ -31,7 +31,7 @@ export async function verifyAccessToken(
         return null
     }
 
-    if (verifiedToken.tokenType !== TokenType.ACCESS) {
+    if (verifiedToken['tokenType'] !== TokenType.ACCESS) {
         return null
     }
 
