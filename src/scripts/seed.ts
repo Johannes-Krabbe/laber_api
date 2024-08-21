@@ -30,7 +30,7 @@ for (let i = 0; i < 10; i++) {
 
     await updateUser(user.id, {
         name: faker.person.fullName(),
-        username: faker.internet.userName(),
+        username: faker.internet.userName().toLowerCase().replace(/[^a-z0-9]/g, ''),
         profilePicture: `https://randomuser.me/api/portraits/med/men/${i.toString()}.jpg`
     });
 

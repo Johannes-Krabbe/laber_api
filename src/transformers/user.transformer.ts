@@ -20,22 +20,32 @@ export function privateUserTransformer(user: User): PrivateUser {
     }
 }
 
-
 interface PublicUser {
     id: string
-    phoneNumberHash: string
     profilePicture: string | null
     name: string | null
     username: string | null
+    phoneNumberHash?: string
+    phoneNumber?: string
+
 }
 
-export function publicUserTransformer(user: User): PublicUser {
-    return {
+export function publicUserTransformer(user: User, options: {
+    includePhoneNumber: boolean
+}): PublicUser {
+    let out: PublicUser = {
         id: user.id,
-        phoneNumberHash: user.phoneNumberHash,
         profilePicture: user.profilePicture,
         name: user.name,
         username: user.username
     }
 
+    if (options.includePhoneNumber) {
+        out = {
+            ...out,
+            phoneNumberHash: user.phoneNumberHash,
+            phoneNumber: user.phoneNumber
+        }
+    }
+    return out
 }

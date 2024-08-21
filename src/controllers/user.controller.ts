@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { prisma } from '../../prisma/client'
 import { publicUserTransformer } from '../transformers/user.transformer'
+import { zCuidValidator } from '../mocks/validators/general.validators'
 
 export const userController = new Hono()
 
@@ -24,55 +25,30 @@ userController.post('/discover/phone-number', zValidator('json', zDiscoverPhoneN
 
     return c.json({
         users:
-            users.map(publicUserTransformer)
+            users.map((user) => publicUserTransformer(user, { includePhoneNumber: true }))
     }, 200)
 })
 
-const zDiscoverUsernameSchema = z.object({
-    username: z.string().max(32),
+const zGetUserUsernameSchema = z.object({
+    userId: zCuidValidator,
 })
 
-userController.get('/discover/username', zValidator('json', zDiscoverUsernameSchema), async (c) => {
-    const data = c.req.valid('json')
-
-
-    const users = await prisma.user.findMany({
-        where: {
-            username: data.username,
-            usernameDiscoveryEnabled: true
-        },
-    })
-
-    return c.json({
-        users:
-            users.map(publicUserTransformer)
-    }, 200)
-})
-
-const zGetUserByIdSchema = z.object({
-    id: z.string().uuid(),
-})
-
-userController.get('/id', zValidator('json', zGetUserByIdSchema), async (c) => {
-    const data = c.req.valid('json')
+userController.get('/:userId', zValidator('param', zGetUserUsernameSchema), async (c) => {
+    const data = c.req.valid('param')
 
     const user = await prisma.user.findUnique({
         where: {
-            id: data.id
-        }
+            id: data.userId
+        },
     })
 
-    if (user) {
-        return c.json({
-
-            user: publicUserTransformer(user)
-        }, 200)
-
-    } else {
+    if (!user) {
         return c.json({
             message: 'User not found'
         }, 404)
-
     }
-})
 
+    return c.json({
+        user: publicUserTransformer(user, { includePhoneNumber: false })
+    }, 200)
+})

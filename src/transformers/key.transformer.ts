@@ -1,4 +1,4 @@
-import { OneTimePreKey, SignedPreKey } from "@prisma/client";
+import { IdentityKey, OneTimePreKey, SignedPreKey } from "@prisma/client";
 
 
 export function signedPreKeyTransformer(key: SignedPreKey) {
@@ -9,7 +9,11 @@ export function oneTimePreKeyTransformer(key: OneTimePreKey) {
     return abstractKeyTransformer(key)
 }
 
-function abstractKeyTransformer(key: SignedPreKey | OneTimePreKey | SignedPreKey) {
+export function identityKeyTransformer(key: IdentityKey) {
+    return abstractKeyTransformer(key)
+}
+
+function abstractKeyTransformer(key: SignedPreKey | OneTimePreKey | IdentityKey) {
     return {
         id: key.id,
         unixCreatedAt: key.createdAt.getTime(),

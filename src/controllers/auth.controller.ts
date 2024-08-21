@@ -5,36 +5,24 @@ import { loginUser, updateUser, verifyOtp } from '../services/auth.service'
 import { privateUserTransformer } from '../transformers/user.transformer'
 import { createAccessToken } from '../utils/token.util'
 import { authMiddleware } from '../middlewares/auth.middleware'
-import { validateAndParsePhoneNumber } from '../utils/phonenumber.util'
+import { zPhoneNumberValidator, zUsernameValidator } from '../mocks/validators/user.validators'
 
 export const authController = new Hono()
 
-const phoneRegex = new RegExp(
-    /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
-);
-
 const zLoginSchema = z.object({
-    phoneNumber: z.string().regex(phoneRegex, 'Invalid phone number').startsWith('+49', 'We only support German phone numbers'),
+    phoneNumber: zPhoneNumberValidator,
 })
 
 // Login or register
 authController.post('/login', zValidator('json', zLoginSchema), async (c) => {
     const data = c.req.valid('json')
 
-    const cleanedPhoneNumber = validateAndParsePhoneNumber(data.phoneNumber)
-    if (!cleanedPhoneNumber) {
-        return c.json({ message: 'Invalid phone number' }, 400)
-    }
-
-    const out = await loginUser({
-        ...data,
-        phoneNumber: cleanedPhoneNumber
-    })
+    const out = await loginUser(data)
     return c.json({ message: out.message }, out.status)
 })
 
 const zVerifySchema = z.object({
-    phoneNumber: z.string().regex(phoneRegex, 'Invalid phone number'),
+    phoneNumber: zPhoneNumberValidator,
     otp: z.string().length(6)
 })
 
@@ -61,7 +49,7 @@ authController.get('/me', authMiddleware, (c) =>
 )
 
 const zUpdateMeSchema = z.object({
-    username: z.string().optional(),
+    username: zUsernameValidator.optional(),
     profilePicture: z.string().optional(),
     name: z.string().optional(),
 })

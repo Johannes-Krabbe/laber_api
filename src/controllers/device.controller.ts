@@ -6,7 +6,9 @@ import { authMiddleware } from '../middlewares/auth.middleware'
 import { createDevice } from '../services/device.service'
 import { isValidEd25519KeyString } from '../utils/curve/ed25519.util';
 import { isValidX25519KeyString } from '../utils/curve/x25519.util';
-import { privateDeviceTransformer } from '../transformers/device.transformer';
+import { privateDeviceTransformer, publicDeviceTransformer } from '../transformers/device.transformer';
+import { zUsernameValidator } from '../mocks/validators/user.validators';
+import { zCuidValidator } from '../mocks/validators/general.validators';
 
 
 export const deviceController = new Hono()
@@ -25,7 +27,7 @@ deviceController.post('/', authMiddleware, zValidator('json', zCreateDeviceSchem
     const user = c.var.auth.user
     const data = c.req.valid('json')
     const out = await createDevice({ ...data, user })
-    if(!out.data || out.status !== 201) {
+    if (!out.data || out.status !== 201) {
         console.log(out.message)
         return c.json({ message: out.message }, out.status)
     }
@@ -50,4 +52,61 @@ deviceController.get('/all', authMiddleware, async (c) => {
     })
 
     return c.json({ devices: devices.map((d) => privateDeviceTransformer(d)) }, 200)
+})
+
+const zGetDeviceKeyBundleSchema = z.object({
+    deviceId: zCuidValidator
+})
+
+deviceController.get('/key-bundle', zValidator('query', zGetDeviceKeyBundleSchema), async (c) => {
+    // TODO - Implement rate limiting
+    // users can only request keybundle for devices 3 times per month per user device
+
+    const data = c.req.valid('query')
+
+    const device = await prisma.device.findUnique({
+        where: {
+            id: data.deviceId
+        },
+        include: {
+            signedPreKey: true,
+            oneTimePreKeys: {
+                take: 1
+            },
+            identityKey: true,
+        }
+    })
+
+    if (!device) {
+        return c.json({ message: 'Device not found' }, 404)
+    }
+
+    if (device.oneTimePreKeys.length === 1) {
+        await prisma.oneTimePreKey.delete({
+            where: {
+                id: device.oneTimePreKeys[0].id
+            }
+        })
+    }
+
+    return c.json({ device: publicDeviceTransformer(device) }, 200)
+})
+
+
+const zGetDevicesUsernameSchema = z.object({
+    username: zUsernameValidator
+})
+
+deviceController.get('/ids', zValidator('query', zGetDevicesUsernameSchema), async (c) => {
+    const data = c.req.valid('query')
+
+    const devices = await prisma.device.findMany({
+        where: {
+            user: {
+                username: data.username
+            }
+        }
+    })
+
+    return c.json({ deviceIds: devices.map(d => d.id) })
 })
