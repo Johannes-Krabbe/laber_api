@@ -1,7 +1,7 @@
-const keys = ['DB_URL', 'NODE_ENV', 'JWT_SECRET', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'SEND_SMS']
+const keys = ['DATABASE_URL', 'NODE_ENV', 'JWT_SECRET', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'SEND_SMS']
 
 interface IENV {
-    DB_URL: string
+    DATABASE_URL: string
     NODE_ENV: 'development' | 'staging' | 'production' | 'test'
     JWT_SECRET: string
     AWS_ACCESS_KEY_ID: string
@@ -28,16 +28,14 @@ function env(): IENV {
         throw new Error(`Environment variable NODE_ENV is not valid`)
     }
 
-    if (process.env['SEND_SMS'] && process.env['SEND_SMS'] !== 'true' && process.env['SEND_SMS'] !== 'false') {
-        throw new Error(`Environment variable SEND_SMS is not valid`)
-    }
-    let SEND_SMS = false
-    if (process.env['SEND_SMS'] === 'true') {
-        SEND_SMS = true
+    // Default value for SEND_SMS is true
+    let SEND_SMS = true 
+    if (process.env['SEND_SMS'] === 'false') {
+        SEND_SMS = false
     }
 
     return {
-        DB_URL: process.env['DB_URL'] as string,
+        DATABASE_URL: process.env['DATABASE_URL'] as string,
         NODE_ENV: process.env.NODE_ENV as
             | 'development'
             | 'production'

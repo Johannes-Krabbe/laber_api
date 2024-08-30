@@ -10,7 +10,7 @@ if (ENV.NODE_ENV === 'test') {
     prisma = new PrismockClient()
 } else {
     prisma = new PrismaClient({
-        datasourceUrl: ENV.DB_URL,
+        datasourceUrl: ENV.DATABASE_URL,
     })
 }
 
