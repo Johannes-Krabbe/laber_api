@@ -7,9 +7,7 @@ import { createDevice } from '../services/device.service'
 import { isValidEd25519KeyString } from '../utils/curve/ed25519.util';
 import { isValidX25519KeyString } from '../utils/curve/x25519.util';
 import { privateDeviceTransformer, publicDeviceTransformer } from '../transformers/device.transformer';
-import { zUsernameValidator } from '../mocks/validators/user.validators';
 import { zCuidValidator } from '../mocks/validators/general.validators';
-
 
 export const deviceController = new Hono()
 
@@ -93,8 +91,9 @@ deviceController.get('/key-bundle', zValidator('query', zGetDeviceKeyBundleSchem
 })
 
 
+// use userid so users can change their username
 const zGetDevicesUsernameSchema = z.object({
-    username: zUsernameValidator
+    userId: zCuidValidator,
 })
 
 deviceController.get('/ids', zValidator('query', zGetDevicesUsernameSchema), async (c) => {
@@ -103,10 +102,10 @@ deviceController.get('/ids', zValidator('query', zGetDevicesUsernameSchema), asy
     const devices = await prisma.device.findMany({
         where: {
             user: {
-                username: data.username
+                id: data.userId
             }
         }
     })
 
-    return c.json({ deviceIds: devices.map(d => d.id) })
+    return c.json({ ids: devices.map(d => d.id) }, 200)
 })
