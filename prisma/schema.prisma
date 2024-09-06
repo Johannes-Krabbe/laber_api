@@ -81,7 +81,7 @@ model Mailbox {
     deviceId String @unique
     device   Device @relation(fields: [deviceId], references: [id])
 
-    Message Message[]
+    messages Message[]
 }
 
 model Message {
@@ -89,7 +89,7 @@ model Message {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    message String
+    content String
 
     // --- Relationships ---
     mailboxId String

@@ -46,6 +46,9 @@ export async function createDevice(data: {
             userId: data.user.id,
             identityKeyId: identityKey.id,
             signedPreKeyId: signedPreKey.id,
+            mailbox: {
+                create: {}
+            }
         }
     })
 
