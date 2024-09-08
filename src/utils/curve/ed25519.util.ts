@@ -1,6 +1,6 @@
 import { Hex } from '@noble/curves/abstract/utils';
 import { ed25519 } from '@noble/curves/ed25519';
-import { uint8ArrayToBase64 } from './encode.util';
+import { uint8ArrayToString } from './encode.util';
 
 export class Ed25519Key {
     private privateKey: Uint8Array
@@ -20,7 +20,7 @@ export class Ed25519Key {
     }
 
     public getPublicKeyString() {
-        return uint8ArrayToBase64(this.publicKey)
+        return uint8ArrayToString(this.publicKey)
     }
 
     public getPrivateKey() {
@@ -28,7 +28,7 @@ export class Ed25519Key {
     }
 
     public getPrivateKeyString() {
-        return uint8ArrayToBase64(this.privateKey)
+        return uint8ArrayToString(this.privateKey)
     }
 
     public sign(data: Hex) {

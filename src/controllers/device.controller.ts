@@ -109,3 +109,26 @@ deviceController.get('/ids', zValidator('query', zGetDevicesUsernameSchema), asy
 
     return c.json({ ids: devices.map(d => d.id) }, 200)
 })
+
+const zGetDeviceSchema = z.object({
+    deviceId: zCuidValidator
+})
+
+deviceController.get('/public/:deviceId', zValidator('param', zGetDeviceSchema), async (c) => {
+    const { deviceId } = c.req.valid('param')
+
+    const device = await prisma.device.findUnique({
+        where: {
+            id: deviceId
+        },
+        include: {
+            user: true
+        }
+    })
+
+    if (!device) {
+        return c.json({ message: 'Device not found' }, 404)
+    }
+
+    return c.json({ device: publicDeviceTransformer(device) }, 200)
+})

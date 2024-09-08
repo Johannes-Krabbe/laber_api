@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test'
 import { ed25519 } from '@noble/curves/ed25519'
-import { base64ToUint8Array, uint8ArrayToBase64 } from './encode.util'
+import { base64ToUint8Array, uint8ArrayToString } from './encode.util'
 import { Ed25519Key, isValidEd25519KeyString } from './ed25519.util'
 
 describe('X25519 Util', () => {
@@ -33,7 +33,7 @@ describe('X25519 Util', () => {
 
     test('conversion', async () => {
         const key = new Ed25519Key();
-        expect(key.getPrivateKey().length).toBe(base64ToUint8Array(uint8ArrayToBase64(key.getPrivateKey())).length);
+        expect(key.getPrivateKey().length).toBe(base64ToUint8Array(uint8ArrayToString(key.getPrivateKey())).length);
     });
 
 })
