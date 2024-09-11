@@ -42,7 +42,7 @@ messageController.get(
             return c.json({ message: 'Unauthorized' }, 401)
         }
 
-        c.json({
+        return c.json({
             messages: mailbox.messages.map((m) =>
                 privateMessageTransformer(m, m.senderDevice.userId)
             ),

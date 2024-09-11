@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 import { FunctionReturnType } from "../types/function.type";
 import { prisma } from "../../prisma/client";
 import { sendSMS } from "./sms.service";
+import { ENV } from "../env";
 
 
 export async function loginUser(data: { phoneNumber: string }): Promise<FunctionReturnType<undefined, 400 | 200 | 201>> {
@@ -116,7 +117,7 @@ export async function verifyOtp(data: { phoneNumber: string, otp: string }): Pro
 }
 
 async function sendOTP(user: User) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    const code = ENV.NODE_ENV === "development" ? "111111" : Math.floor(100000 + Math.random() * 900000).toString()
 
     await prisma.otp.create({
         data: {

@@ -121,7 +121,9 @@ deviceController.get('/public/:deviceId', zValidator('param', zGetDeviceSchema),
             id: deviceId
         },
         include: {
-            user: true
+            user: true,
+            identityKey: true,
+            signedPreKey: true,
         }
     })
 
