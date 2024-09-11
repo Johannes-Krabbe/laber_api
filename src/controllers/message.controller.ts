@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { authMiddleware } from '../middlewares/auth.middleware'
 import { z } from 'zod'
-import { zCuidValidator } from '../mocks/validators/general.validators'
+import { zCuidValidator } from '../validators/general.validators'
 import { zValidator } from '@hono/zod-validator'
 import { prisma } from '../../prisma/client'
 import { privateMessageTransformer } from '../transformers/message.transformer'

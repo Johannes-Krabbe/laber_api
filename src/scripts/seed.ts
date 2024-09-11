@@ -6,7 +6,7 @@ import { X25519Key } from "../utils/curve/x25519.util";
 import { createDevice } from "../services/device.service";
 import { uint8ArrayToString } from "../utils/curve/encode.util";
 
-const userCount = 1;
+const userCount = 10;
 
 function generateMockPhoneNumber(): string {
     const countryCode = '49'; // Germany's country code
@@ -14,6 +14,20 @@ function generateMockPhoneNumber(): string {
     const subscriberNumber = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
 
     return `+${countryCode}${areaCode}${subscriberNumber}`;
+}
+
+function generateMockProfilePictureUrl(): string {
+    const randomNumber = Math.floor(Math.random() * 100);
+    const randomBoolean = Math.random() >= 0.5;
+    const randomGender = randomBoolean ? 'men' : 'women'
+    return `https://randomuser.me/api/portraits/med/${randomGender}/${randomNumber}.jpg`
+}
+
+function getKeyDataString(key: string): string {
+    return JSON.stringify({
+        type: 'KeyPairType.x25519',
+        publicKey: key
+    })
 }
 
 for (let i = 0; i < userCount; i++) {
@@ -33,8 +47,8 @@ for (let i = 0; i < userCount; i++) {
     await updateUser(user.id, {
         name: faker.person.fullName(),
         username: faker.internet.userName().toLowerCase().replace(/[^a-z0-9]/g, ''),
-        profilePicture: `https://randomuser.me/api/portraits/med/men/${i.toString()}.jpg`
-    });
+        profilePicture: generateMockProfilePictureUrl()
+    })
 
     const identityKeyPair = new Ed25519Key()
 
@@ -56,14 +70,13 @@ for (let i = 0; i < userCount; i++) {
     console.log(user)
     await createDevice({
         deviceName: faker.lorem.word(),
-        identityKey: identityKeyPair.getPublicKeyString(),
+        identityKey: getKeyDataString(identityKeyPair.getPublicKeyString()),
         signedPreKey: {
-            key: preKeyPair.getPublicKeyString(),
+            key: getKeyDataString(preKeyPair.getPublicKeyString()),
             signature: signatureStr,
         },
-        oneTimePreKeys: oneTimePreKeyPairs.map((key) => key.getPublicKeyString()),
+        oneTimePreKeys: oneTimePreKeyPairs.map((key) => getKeyDataString(key.getPublicKeyString())),
 
         user
     })
 }
-

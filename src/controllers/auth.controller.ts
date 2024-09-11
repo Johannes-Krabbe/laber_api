@@ -5,7 +5,7 @@ import { loginUser, updateUser, verifyOtp } from '../services/auth.service'
 import { privateUserTransformer } from '../transformers/user.transformer'
 import { createAccessToken } from '../utils/token.util'
 import { authMiddleware } from '../middlewares/auth.middleware'
-import { zPhoneNumberValidator, zUsernameValidator } from '../mocks/validators/user.validators'
+import { zPhoneNumberValidator, zUsernameValidator } from '../validators/user.validators'
 
 export const authController = new Hono()
 

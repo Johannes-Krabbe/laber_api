@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { prisma } from '../../prisma/client'
 import { publicUserTransformer } from '../transformers/user.transformer'
-import { zCuidValidator } from '../mocks/validators/general.validators'
+import { zCuidValidator } from '../validators/general.validators'
 
 export const userController = new Hono()
 

@@ -4,21 +4,20 @@ import { prisma } from "../../prisma/client";
 import { z } from 'zod'
 import { authMiddleware } from '../middlewares/auth.middleware'
 import { createDevice } from '../services/device.service'
-import { isValidEd25519KeyString } from '../utils/curve/ed25519.util';
-import { isValidX25519KeyString } from '../utils/curve/x25519.util';
 import { privateDeviceTransformer, publicDeviceTransformer } from '../transformers/device.transformer';
-import { zCuidValidator } from '../mocks/validators/general.validators';
+import { zCuidValidator } from '../validators/general.validators';
+import { zEd25519KeyValidator, zX25519KeyValidator } from '../validators/key.validator';
 
 export const deviceController = new Hono()
 
 const zCreateDeviceSchema = z.object({
     deviceName: z.string().min(3).max(20),
-    identityKey: z.string().refine(isValidEd25519KeyString, { message: 'Invalid identity key' }),
+    identityKey: zEd25519KeyValidator,
     signedPreKey: z.object({
-        key: z.string().refine((isValidX25519KeyString), { message: 'Invalid signed pre key' }),
+        key: zX25519KeyValidator,
         signature: z.string(),
     }),
-    oneTimePreKeys: z.array(z.string().refine(isValidX25519KeyString, { message: 'Invalid one time pre key' })).min(5),
+    oneTimePreKeys: z.array(zX25519KeyValidator).min(5),
 })
 
 deviceController.post('/', authMiddleware, zValidator('json', zCreateDeviceSchema), async (c) => {
