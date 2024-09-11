@@ -31,5 +31,3 @@ app.onError((err, c) => {
 
 app.route('', router)
 export default app
-
-

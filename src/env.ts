@@ -1,4 +1,12 @@
-const keys = ['DATABASE_URL', 'NODE_ENV', 'JWT_SECRET', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'SEND_SMS']
+const keys = [
+    'DATABASE_URL',
+    'NODE_ENV',
+    'JWT_SECRET',
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+    'AWS_REGION',
+    'SEND_SMS',
+]
 
 interface IENV {
     DATABASE_URL: string
@@ -29,7 +37,7 @@ function env(): IENV {
     }
 
     // Default value for SEND_SMS is true
-    let SEND_SMS = true 
+    let SEND_SMS = true
     if (process.env['SEND_SMS'] === 'false') {
         SEND_SMS = false
     }
