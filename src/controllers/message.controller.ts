@@ -58,12 +58,25 @@ const zPostNewMessageBodySchema = z.object({
 })
 
 messageController.post(
-    '/new/:senderDeviceId',
+    '/new',
     authMiddleware,
     zValidator('json', zPostNewMessageBodySchema),
     async (c) => {
         const { user } = c.var.auth
         const data = c.req.valid('json')
+
+        const senderDevice = await prisma.device.findUnique({
+            where: {
+                id: data.senderDeviceId,
+            },
+            include: {
+                user: true,
+            },
+        })
+
+        if(!senderDevice || senderDevice.userId !== user.id) {
+            return c.json({ message: 'Unauthorized' }, 401)
+        }
 
         const recipientMailbox = await prisma.mailbox.findUnique({
             where: {
@@ -76,10 +89,6 @@ messageController.post(
 
         if (!recipientMailbox) {
             return c.json({ message: 'Mailbox not found' }, 404)
-        }
-
-        if (recipientMailbox.device.userId !== user.id) {
-            return c.json({ message: 'Unauthorized' }, 401)
         }
 
         const message = await prisma.message.create({
