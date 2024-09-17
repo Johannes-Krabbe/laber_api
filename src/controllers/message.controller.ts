@@ -39,8 +39,18 @@ messageController.get(
         }
 
         if (mailbox.device.userId !== user.id) {
-            return c.json({ message: 'Unauthorized' }, 401)
+            return c.json({ message: 'Unauthorized (code: gnm_1)' }, 401)
         }
+
+        const messages = mailbox.messages
+
+        await prisma.message.deleteMany({
+            where: {
+                id: {
+                    in: messages.map((m) => m.id),
+                },
+            },
+        })
 
         return c.json({
             messages: mailbox.messages.map((m) =>
@@ -74,8 +84,8 @@ messageController.post(
             },
         })
 
-        if(!senderDevice || senderDevice.userId !== user.id) {
-            return c.json({ message: 'Unauthorized' }, 401)
+        if (!senderDevice || senderDevice.userId !== user.id) {
+            return c.json({ message: 'Unauthorized (code: nm_1)' }, 401)
         }
 
         const recipientMailbox = await prisma.mailbox.findUnique({
