@@ -5,7 +5,7 @@ import { loginUser, updateUser, verifyOtp } from '../services/auth.service'
 import { privateUserTransformer } from '../transformers/user.transformer'
 import { createAccessToken } from '../utils/token.util'
 import { authMiddleware } from '../middlewares/auth.middleware'
-import { zPhoneNumberValidator, zUsernameValidator } from '../validators/user.validators'
+import { zNameValidator, zPhoneNumberValidator, zUsernameValidator } from '../validators/user.validators'
 
 export const authController = new Hono()
 
@@ -40,7 +40,6 @@ authController.post('/verify', zValidator('json', zVerifySchema), async (c) => {
 
 })
 
-
 authController.get('/me', authMiddleware, (c) =>
     c.json(
         { user: privateUserTransformer(c.var.auth.user) },
@@ -48,14 +47,22 @@ authController.get('/me', authMiddleware, (c) =>
     )
 )
 
-const zUpdateMeSchema = z.object({
-    username: zUsernameValidator.optional(),
-    profilePicture: z.string().optional(),
-    name: z.string().optional(),
+const zUpdateUserSchema = z.object({
+    username: zUsernameValidator.nullish(),
+    name: zNameValidator.nullish(),
+    phoneNumber: zPhoneNumberValidator.nullish(),
+    phoneNumberDiscoveryEnabled: z.boolean().nullish(),
+    usernameDiscoveryEnabled: z.boolean().nullish(),
 })
 
-authController.post('/me/update', authMiddleware, zValidator('json', zUpdateMeSchema), async (c) => {
+authController.put('/me/update', zValidator('json', zUpdateUserSchema), authMiddleware, async (c) => {
     const data = c.req.valid('json')
-    const out = await updateUser(c.var.auth.user.id, data)
+    const out = await updateUser(c.var.auth.user.id, {
+        username: data.username ?? undefined,
+        name: data.name ?? undefined,
+        phoneNumber: data.phoneNumber ?? undefined,
+        phoneNumberDiscoveryEnabled: data.phoneNumberDiscoveryEnabled ?? undefined,
+        usernameDiscoveryEnabled: data.usernameDiscoveryEnabled ?? undefined,
+    })
     return c.json({ message: out.message }, out.status)
 })

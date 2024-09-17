@@ -36,8 +36,10 @@ export async function loginUser(data: { phoneNumber: string }): Promise<Function
 
 export async function updateUser(userId: string, data: {
     username?: string,
-    profilePicture?: string,
     name?: string,
+    phoneNumber?: string,
+    phoneNumberDiscoveryEnabled?: boolean,
+    usernameDiscoveryEnabled?: boolean
 }): Promise<FunctionReturnType<User, 400 | 200>> {
     const user = await prisma.user.findUnique({
         where: {

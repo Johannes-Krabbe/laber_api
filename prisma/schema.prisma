@@ -18,13 +18,14 @@ model User {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    // TODO phonenumber verified + not unique phone numbers so no one can block them
     phoneNumber         String  @unique
     phoneNumberHash     String  @unique
     onboardingCompleted Boolean @default(false)
 
-    username            String? @unique
-    profilePicture      String?
-    name                String?
+    username       String? @unique
+    profilePicture String?
+    name           String?
 
     phoneNumberDiscoveryEnabled Boolean @default(true)
     usernameDiscoveryEnabled    Boolean @default(true)
