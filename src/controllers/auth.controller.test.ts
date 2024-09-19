@@ -31,7 +31,7 @@ describe('Auth Controller', () => {
         const user = await prisma.user.findFirst({
             where: {
                 phoneNumber: userdata.phoneNumber,
-            }
+            },
         })
 
         expect(user).toBeDefined()
@@ -46,7 +46,7 @@ describe('Auth Controller', () => {
         const otp = await prisma.otp.findFirst({
             where: {
                 userId: user.id,
-            }
+            },
         })
 
         expect(otp).toBeDefined()
@@ -54,7 +54,6 @@ describe('Auth Controller', () => {
         expect(otp.code).toBeDefined()
         expect(otp.userId).toBe(user.id)
         expect(otp.code.length).toBe(6)
-
 
         res = await appMock.post('/auth/verify', {
             body: {
@@ -113,7 +112,6 @@ describe('Auth Controller', () => {
             body: userdata,
         })
 
-
         // login
         res = await appMock.post('/auth/login', {
             body: userdata,
@@ -127,15 +125,15 @@ describe('Auth Controller', () => {
         const user = await prisma.user.findFirst({
             where: {
                 phoneNumber: userdata.phoneNumber,
-            }
+            },
         })
 
-        if(!user) throw new Error('user not found')
+        if (!user) throw new Error('user not found')
 
         const otp = await prisma.otp.findFirst({
             where: {
                 userId: user.id,
-            }
+            },
         })
 
         expect(otp).toBeDefined()
@@ -143,7 +141,6 @@ describe('Auth Controller', () => {
         expect(otp.code).toBeDefined()
         expect(otp.userId).toBe(user.id)
         expect(otp.code.length).toBe(6)
-
 
         res = await appMock.post('/auth/verify', {
             body: {
@@ -170,7 +167,6 @@ describe('Auth Controller', () => {
             body: userdata,
         })
 
-
         // login
         res = await appMock.post('/auth/login', {
             body: userdata,
@@ -184,17 +180,15 @@ describe('Auth Controller', () => {
         const user = await prisma.user.findFirst({
             where: {
                 phoneNumber: userdata.phoneNumber,
-            }
+            },
         })
 
-        if(!user) throw new Error('user not found')
-
-
+        if (!user) throw new Error('user not found')
 
         const otp = await prisma.otp.findFirst({
             where: {
                 userId: user.id,
-            }
+            },
         })
 
         expect(otp).toBeDefined()
@@ -202,7 +196,6 @@ describe('Auth Controller', () => {
         expect(otp.code).toBeDefined()
         expect(otp.userId).toBe(user.id)
         expect(otp.code.length).toBe(6)
-
 
         res = await appMock.post('/auth/verify', {
             body: {
@@ -236,7 +229,7 @@ describe('Auth Controller', () => {
                 user: {
                     phoneNumber: userdata.phoneNumber,
                 },
-            }
+            },
         })
 
         if (!otp) throw new Error('otp not found')

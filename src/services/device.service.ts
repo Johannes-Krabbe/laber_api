@@ -1,6 +1,12 @@
-import { Device, IdentityKey, OneTimePreKey, SignedPreKey, User } from "@prisma/client"
-import { FunctionReturnType } from "../types/function.type"
-import { prisma } from "../../prisma/client"
+import {
+    Device,
+    IdentityKey,
+    OneTimePreKey,
+    SignedPreKey,
+    User,
+} from '@prisma/client'
+import { prisma } from '../../prisma/client'
+import { THROW_ERROR } from '../types/error.type'
 
 // TODO think of potential errors and handle them
 export async function createDevice(data: {
@@ -12,32 +18,33 @@ export async function createDevice(data: {
     }
     oneTimePreKeys: string[]
     user: User
-}): Promise<FunctionReturnType<{ device: Device, identityKey: IdentityKey, signedPreKey: SignedPreKey, oneTimePreKeys: OneTimePreKey[] }, 409 | 201>> {
-
+}): Promise<{
+    device: Device
+    identityKey: IdentityKey
+    signedPreKey: SignedPreKey
+    oneTimePreKeys: OneTimePreKey[]
+}> {
     const existingDevice = await prisma.device.findFirst({
         where: {
             name: data.deviceName,
-            userId: data.user.id
-        }
+            userId: data.user.id,
+        },
     })
     if (existingDevice) {
-        return {
-            status: 409,
-            message: "Device with the same name already exists for the user",
-        }
+        return THROW_ERROR.DEVICE_ALREADY_EXISTS('err0005')
     }
 
     const identityKey = await prisma.identityKey.create({
         data: {
             key: data.identityKey,
-        }
+        },
     })
 
     const signedPreKey = await prisma.signedPreKey.create({
         data: {
             key: data.signedPreKey.key,
             signature: data.signedPreKey.signature,
-        }
+        },
     })
 
     const device = await prisma.device.create({
@@ -47,9 +54,9 @@ export async function createDevice(data: {
             identityKeyId: identityKey.id,
             signedPreKeyId: signedPreKey.id,
             mailbox: {
-                create: {}
-            }
-        }
+                create: {},
+            },
+        },
     })
 
     const oneTimePreKeys: OneTimePreKey[] = []
@@ -57,22 +64,16 @@ export async function createDevice(data: {
         const oneTimePreKey = await prisma.oneTimePreKey.create({
             data: {
                 key: key,
-                deviceId: device.id
-            }
+                deviceId: device.id,
+            },
         })
         oneTimePreKeys.push(oneTimePreKey)
     }
 
-
     return {
-        status: 201,
-        message: "Device created successfully",
-        data: {
-            device,
-            identityKey,
-            signedPreKey,
-            oneTimePreKeys: oneTimePreKeys
-        }
+        device,
+        identityKey,
+        signedPreKey,
+        oneTimePreKeys: oneTimePreKeys,
     }
-
 }

@@ -16,9 +16,11 @@ describe('Device Controller', () => {
 
         const identityKeyPair = new Ed25519Key()
 
-        const oneTimePreKeyPairs = await Promise.all(Array.from({ length: 5 }, async () => {
-            return new X25519Key()
-        }))
+        const oneTimePreKeyPairs = await Promise.all(
+            Array.from({ length: 5 }, async () => {
+                return new X25519Key()
+            })
+        )
 
         const preKeyPair = new X25519Key()
         const signature = identityKeyPair.sign(preKeyPair.getPublicKey())
@@ -34,8 +36,10 @@ describe('Device Controller', () => {
                     key: preKeyPair.getPublicKeyString(),
                     signature: new TextDecoder().decode(signature),
                 },
-                oneTimePreKeys: oneTimePreKeyPairs.map((key) => key.getPublicKeyString()),
-            }
+                oneTimePreKeys: oneTimePreKeyPairs.map((key) =>
+                    key.getPublicKeyString()
+                ),
+            },
         })
 
         expect(out.status).toBe(201)
@@ -46,9 +50,11 @@ describe('Device Controller', () => {
 
         const identityKeyPair = new Ed25519Key()
 
-        const oneTimePreKeyPairs = await Promise.all(Array.from({ length: 5 }, async () => {
-            return new X25519Key()
-        }))
+        const oneTimePreKeyPairs = await Promise.all(
+            Array.from({ length: 5 }, async () => {
+                return new X25519Key()
+            })
+        )
 
         const preKeyPair = new X25519Key()
         const signature = identityKeyPair.sign(preKeyPair.getPublicKey())
@@ -64,14 +70,16 @@ describe('Device Controller', () => {
                     key: preKeyPair.getPublicKeyString(),
                     signature: new TextDecoder().decode(signature),
                 },
-                oneTimePreKeys: oneTimePreKeyPairs.map((key) => key.getPublicKeyString()),
-            }
+                oneTimePreKeys: oneTimePreKeyPairs.map((key) =>
+                    key.getPublicKeyString()
+                ),
+            },
         })
 
         const out = await appMock.get('/device/all', {
             headers: {
                 Authorization: `Bearer ${userdata.token}`,
-            }
+            },
         })
 
         expect(out.status).toBe(200)

@@ -27,24 +27,26 @@ interface PublicUser {
     username: string | null
     phoneNumberHash?: string
     phoneNumber?: string
-
 }
 
-export function publicUserTransformer(user: User, options: {
-    includePhoneNumber: boolean
-}): PublicUser {
+export function publicUserTransformer(
+    user: User,
+    options: {
+        includePhoneNumber: boolean
+    }
+): PublicUser {
     let out: PublicUser = {
         id: user.id,
         profilePicture: user.profilePicture,
         name: user.name,
-        username: user.username
+        username: user.username,
     }
 
     if (options.includePhoneNumber) {
         out = {
             ...out,
             phoneNumberHash: user.phoneNumberHash,
-            phoneNumber: user.phoneNumber
+            phoneNumber: user.phoneNumber,
         }
     }
     return out

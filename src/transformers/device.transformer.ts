@@ -1,10 +1,14 @@
 import { Prisma, Device } from '@prisma/client'
-import { identityKeyTransformer, oneTimePreKeyTransformer, signedPreKeyTransformer } from './key.transformer'
+import {
+    identityKeyTransformer,
+    oneTimePreKeyTransformer,
+    signedPreKeyTransformer,
+} from './key.transformer'
 
 type DeviceWithRelations = Prisma.DeviceGetPayload<{
     include: {
-        user: true,
-        oneTimePreKeys: true,
+        user: true
+        oneTimePreKeys: true
         signedPreKey: true
         identityKey: true
     }
@@ -14,8 +18,14 @@ export function privateDeviceTransformer(device: DeviceWithRelations | Device) {
     return {
         id: device.id,
         deviceName: device.name,
-        signedPreKey: 'signedPreKey' in device ? signedPreKeyTransformer(device.signedPreKey) : null,
-        oneTimePreKeys: 'oneTimePreKeys' in device ? device.oneTimePreKeys.map(oneTimePreKeyTransformer) : null,
+        signedPreKey:
+            'signedPreKey' in device
+                ? signedPreKeyTransformer(device.signedPreKey)
+                : null,
+        oneTimePreKeys:
+            'oneTimePreKeys' in device
+                ? device.oneTimePreKeys.map(oneTimePreKeyTransformer)
+                : null,
     }
 }
 
@@ -26,8 +36,17 @@ export function publicDeviceTransformer(device: DeviceWithRelations | Device) {
 
     return {
         id: device.id,
-        signedPreKey: 'signedPreKey' in device ? signedPreKeyTransformer(device.signedPreKey) : null,
-        oneTimePreKey: 'oneTimePreKeys' in device ? oneTimePreKeyTransformer(device.oneTimePreKeys[0]) : null,
-        identityKey: 'identityKey' in device ? identityKeyTransformer(device.identityKey) : null,
+        signedPreKey:
+            'signedPreKey' in device
+                ? signedPreKeyTransformer(device.signedPreKey)
+                : null,
+        oneTimePreKey:
+            'oneTimePreKeys' in device
+                ? oneTimePreKeyTransformer(device.oneTimePreKeys[0])
+                : null,
+        identityKey:
+            'identityKey' in device
+                ? identityKeyTransformer(device.identityKey)
+                : null,
     }
 }

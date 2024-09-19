@@ -5,6 +5,7 @@ import { zCuidValidator } from '../validators/general.validators'
 import { zValidator } from '@hono/zod-validator'
 import { prisma } from '../../prisma/client'
 import { privateMessageTransformer } from '../transformers/message.transformer'
+import { THROW_ERROR } from '../types/error.type'
 
 export const messageController = new Hono()
 
@@ -35,11 +36,11 @@ messageController.get(
         })
 
         if (!mailbox) {
-            return c.json({ message: 'Mailbox not found' }, 404)
+            return THROW_ERROR.MAILBOX_NOT_FOUND('err0008')
         }
 
         if (mailbox.device.userId !== user.id) {
-            return c.json({ message: 'Unauthorized (code: gnm_1)' }, 401)
+            return THROW_ERROR.UNAUTHORIZED('err0009')
         }
 
         const messages = mailbox.messages
@@ -85,7 +86,7 @@ messageController.post(
         })
 
         if (!senderDevice || senderDevice.userId !== user.id) {
-            return c.json({ message: 'Unauthorized (code: nm_1)' }, 401)
+            return THROW_ERROR.UNAUTHORIZED('err0010')
         }
 
         const recipientMailbox = await prisma.mailbox.findUnique({
@@ -98,7 +99,7 @@ messageController.post(
         })
 
         if (!recipientMailbox) {
-            return c.json({ message: 'Mailbox not found' }, 404)
+            return THROW_ERROR.MAILBOX_NOT_FOUND('err0011')
         }
 
         const message = await prisma.message.create({
