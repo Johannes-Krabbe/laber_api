@@ -22,7 +22,7 @@ authController.post('/login', zValidator('json', zLoginSchema), async (c) => {
     const data = c.req.valid('json')
 
     const out = await loginUser(data)
-    return c.status(out.status)
+    return c.json({ message: 'success' }, out.status)
 })
 
 const zVerifySchema = z.object({

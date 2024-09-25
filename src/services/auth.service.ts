@@ -111,6 +111,13 @@ async function sendOTP(user: User) {
             ? '111111'
             : Math.floor(100000 + Math.random() * 900000).toString()
 
+    await prisma.otp.deleteMany({
+        where: {
+            code,
+            userId: user.id,
+        },
+    })
+
     await prisma.otp.create({
         data: {
             code,

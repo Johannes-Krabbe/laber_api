@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import router from './router'
 import { ENV } from './env'
 import { ApplicationError } from './types/error.type'
+import { logger } from 'hono/logger'
 
 // validate env variables
 ENV
@@ -22,8 +23,13 @@ app.use(
     })
 )
 
+if(ENV.NODE_ENV === 'development') {
+    app.use(logger())
+}
+
 app.onError((err, c) => {
     if (err instanceof ApplicationError) {
+        console.error(`position: ${err.error.positionCode}`)
         return c.json(err.error, err.httpStatus)
     }
     return c.json({ error: err.message }, 500)
