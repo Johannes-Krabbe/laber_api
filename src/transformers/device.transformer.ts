@@ -18,6 +18,7 @@ export function privateDeviceTransformer(device: DeviceWithRelations | Device) {
     return {
         id: device.id,
         deviceName: device.name,
+        unixCreatedAt: device.createdAt.getTime(),
         signedPreKey:
             'signedPreKey' in device
                 ? signedPreKeyTransformer(device.signedPreKey)

@@ -82,7 +82,7 @@ for (let i = 0; i < userCount; i++) {
     console.log(signature)
 
     console.log(user)
-    const device = await createDevice({
+    const data = await createDevice({
         deviceName: faker.lorem.word(),
         identityKey: getKeyDataString(identityKeyPair.getPublicKeyString()),
         signedPreKey: {
@@ -98,7 +98,7 @@ for (let i = 0; i < userCount; i++) {
 
     const mailbox = await prisma.mailbox.findUnique({
         where: {
-            deviceId: device.data?.device.id,
+            deviceId: data.device.id,
         },
         include: {
             device: true,
