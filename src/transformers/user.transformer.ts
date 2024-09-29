@@ -26,7 +26,6 @@ interface PublicUser {
     name: string | null
     username: string | null
     phoneNumberHash?: string
-    phoneNumber?: string
 }
 
 export function publicUserTransformer(
@@ -46,7 +45,6 @@ export function publicUserTransformer(
         out = {
             ...out,
             phoneNumberHash: user.phoneNumberHash,
-            phoneNumber: user.phoneNumber,
         }
     }
     return out
